@@ -12,11 +12,19 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: Scaffold(
+        /// Scaffold is a convenience widget that provides a Material-style page layout, 
+        /// making it simple to add an app bar, drawer, navigation bar, and more to a page of your app
+        appBar: AppBar(
+          title: const Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Birdle'),
+          ),
+        ),
         body: Center(
-          child: Tile('A', HitType.none)
-        )
+          child: GamePage()
+        ),
       ),
     );
   }
@@ -55,6 +63,35 @@ class Tile extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge,
         ),
       )
+    );
+  }
+}
+
+class GamePage extends StatelessWidget {
+  GamePage({super.key});
+
+  final Game _game = Game();
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        spacing: 5.0,
+        children: [
+          for (final guess in _game.guesses)
+          /// This for loop is called a 'collection for element', a Dart syntax that allows you to 
+          /// iteratively add items to a collection when it is built at runtime.
+            Row(
+              spacing: 5.0,
+              children: [
+                for (final letter in guess)
+                  Tile(letter.char, letter.type,)
+              ],
+            )
+        ],
+      ),
     );
   }
 }
