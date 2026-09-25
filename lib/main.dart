@@ -67,6 +67,65 @@ class Tile extends StatelessWidget {
   }
 }
 
+/// GuessInput Widget is responsible for allowing users to type in their guesses
+/// requires a callback function as an argument - onSubmitGuess
+class GuessInput extends StatelessWidget {
+  GuessInput({super.key, required this.onSubmitGuess});
+
+  final void Function(String) onSubmitGuess;
+  // A TextEditingController is used to read, clear, and modify the text in a TextField
+  final TextEditingController _textEditingController = TextEditingController();
+  // A FocusNode manages the keyboard focus. You can use FocusNode to request that a TextField gain focus, (making the keyboard appear on mobile), or to know when a field has focus.
+  final FocusNode _focusNode = FocusNode();
+
+  void _onSubmit () {
+    onSubmitGuess(_textEditingController.text.trim());
+    _textEditingController.clear();
+    _focusNode.requestFocus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        /// When a child of a Row or Column is wrapped in Expanded, it tells that child to fill all the available space
+        /// along the main axis (horizontal forRow, vertical for Column) that hasn't been taken by other children. 
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              maxLength: 5,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                )
+              ),
+              controller: _textEditingController,
+              autofocus: true,
+              focusNode: _focusNode, // Allows focus even after the 'Enter' key is pressed
+              onSubmitted: (input) {
+                // onSubmitted is used to capture the text when the user presses the 'Enter' key when the 
+                _onSubmit();
+              },
+            ),
+          )
+        ),
+        IconButton(
+          /// IconButton widget requires two arguments (in addition to their optional arguments) 
+          /// 1) A callback function passed to onPressed.
+          /// 2) A widget that makes up the content of the button (often Text or an Icon).
+          padding: EdgeInsets.zero,
+          icon: const Icon(Icons.send_rounded),
+          onPressed: () {
+            _onSubmit();
+          },
+        ),
+      ],
+    );
+  }
+}
+
+
 class GamePage extends StatelessWidget {
   GamePage({super.key});
 
@@ -89,7 +148,13 @@ class GamePage extends StatelessWidget {
                 for (final letter in guess)
                   Tile(letter.char, letter.type,)
               ],
-            )
+            ),
+          
+          GuessInput(
+            onSubmitGuess: (guess) {
+              print(guess);
+            }
+          ),
         ],
       ),
     );
