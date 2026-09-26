@@ -39,9 +39,13 @@ class Tile extends StatelessWidget {
   // The build() method must be defined for every widget and always returns another widget
   @override
   Widget build(BuildContext context) {
-    return Container(
-      /// Container is a convenience widget that wraps several core styling widgets,
+    return AnimatedContainer(
+      /// A Container is a convenience widget that wraps several core styling widgets,
       /// such as Padding, ColoredBox, SizedBox, and DecoratedBox.
+      /// An AnimatedContainer is like a Container, 
+      /// but it automatically animates changes to its properties over a specified duration
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeIn, // Curves change the speed of the animation at different points throughout the animation
       width: 60,
       height: 60,
       decoration: BoxDecoration(
@@ -69,17 +73,30 @@ class Tile extends StatelessWidget {
 
 /// GuessInput Widget is responsible for allowing users to type in their guesses
 /// requires a callback function as an argument - onSubmitGuess
-class GuessInput extends StatelessWidget {
+class GuessInput extends StatefulWidget {
   GuessInput({super.key, required this.onSubmitGuess});
 
   final void Function(String) onSubmitGuess;
+
+  @override
+  State<GuessInput> createState() => _GuessInputState();
+}
+
+class _GuessInputState extends State<GuessInput> {
   // A TextEditingController is used to read, clear, and modify the text in a TextField
   final TextEditingController _textEditingController = TextEditingController();
   // A FocusNode manages the keyboard focus. You can use FocusNode to request that a TextField gain focus, (making the keyboard appear on mobile), or to know when a field has focus.
   final FocusNode _focusNode = FocusNode();
 
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   void _onSubmit () {
-    onSubmitGuess(_textEditingController.text.trim());
+    widget.onSubmitGuess(_textEditingController.text.trim());
     _textEditingController.clear();
     _focusNode.requestFocus();
   }
@@ -98,7 +115,8 @@ class GuessInput extends StatelessWidget {
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
-                )
+                ),
+                focusColor: Color(Colors.blueGrey.hashCode),
               ),
               controller: _textEditingController,
               autofocus: true,
@@ -126,9 +144,16 @@ class GuessInput extends StatelessWidget {
 }
 
 
-class GamePage extends StatelessWidget {
+class GamePage extends StatefulWidget {
+  /// StatefulWidget and it's companion State allow a Widget's data/appearance to change during it's lifetime
+  /// StatefulWidget is immutable but the State object is long-lived and can hold mutable data so it can be used to rebuild UI when its data changes
   GamePage({super.key});
 
+  @override
+  State<GamePage> createState() => _GamePageState(); // This is the state
+}
+
+class _GamePageState extends State<GamePage> {
   final Game _game = Game();
 
   @override
@@ -144,15 +169,22 @@ class GamePage extends StatelessWidget {
           /// iteratively add items to a collection when it is built at runtime.
             Row(
               spacing: 5.0,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 for (final letter in guess)
-                  Tile(letter.char, letter.type,)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 2.5),
+                    child: Tile(letter.char, letter.type,),
+                  ),
               ],
             ),
           
           GuessInput(
-            onSubmitGuess: (guess) {
-              print(guess);
+            onSubmitGuess: (String guess) {
+              setState(() {
+                // setState signals the framework to update the UI and call the build method again.
+                _game.guess(guess);
+              });
             }
           ),
         ],
